@@ -11,7 +11,7 @@ const { mainnet, sepolia } = require('viem/chains');
 const publicClient = createPublicClient({
   chain: mainnet,
   transport: http(
-    // 'https://eth-sepolia.g.alchemy.com/v2/4skKweefhtqDlhmh1W502pf8b3O9ymuA'
+    'https://eth-sepolia.g.alchemy.com/v2/4skKweefhtqDlhmh1W502pf8b3O9ymuA'
   ),
 });
 const ethereum = require('@airgap/ethereum/v0');
@@ -28,18 +28,18 @@ const serializer = Serializer.getInstance();
 const app = express();
 const port = 3000;
 const ethereumProtocol = new ethereum.EthereumProtocol(
-//   new ethereum.EthereumProtocolOptions(
-//     new ethereum.EthereumProtocolNetwork(
-//       'Sepolia',
-//       NetworkType.TESTNET,
-//       'https://eth-sepolia.g.alchemy.com/v2/4skKweefhtqDlhmh1W502pf8b3O9ymuA',
-//       'https://sepolia.etherscan.io',
-//       {
-//         blockExplorerApi: 'https://sepolia.etherscan.io/api',
-//         chainID: 11155111,
-//       }
-//     )
-//   )
+  new ethereum.EthereumProtocolOptions(
+    new ethereum.EthereumProtocolNetwork(
+      'Sepolia',
+      NetworkType.TESTNET,
+      'https://eth-sepolia.g.alchemy.com/v2/4skKweefhtqDlhmh1W502pf8b3O9ymuA',
+      'https://sepolia.etherscan.io',
+      {
+        blockExplorerApi: 'https://sepolia.etherscan.io/api',
+        chainID: 11155111,
+      }
+    )
+  )
 );
 
 app.use(express.json());
