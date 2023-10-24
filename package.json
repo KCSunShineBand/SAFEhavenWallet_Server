@@ -5,15 +5,21 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "nodemon --ignore ./airgap-coin-lib/ index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "airgap-coin-lib": "^0.9.14",
+    "@airgap/coinlib-core": "^0.13.21",
+    "@airgap/ethereum": "^0.13.21",
+    "@airgap/serializer": "^0.13.21",
+    "@keystonehq/bc-ur-registry": "^0.6.4",
+    "@keystonehq/bc-ur-registry-eth": "^0.19.1",
+    "@ngraveio/bc-ur": "^1.1.6",
     "express": "^4.18.2",
     "nodemon": "^3.0.1",
-    "viem": "^1.16.6"
+    "viem": "^1.16.6",
+    "wagmi": "^1.4.4"
   }
 }
