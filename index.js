@@ -78,7 +78,7 @@ app.post('/transfer/request', async (req, res, next) => {
     const { address, protocol, publicKey, recipient, amount } = req.body;
     let unsignedTx;
     switch (protocol) {
-      case 'eth':
+      case MainProtocolSymbols.ETH:
         {
           console.log('address :>> ', address);
           const gas = await publicClient.estimateGas({
@@ -142,13 +142,20 @@ app.post('/transfer/response', async (req, res, next) => {
 });
 
 app.post('/tx/status', async (req, res) => {
-  const { txHash } = req.body;
+  const { protocol, txHash } = req.body;
   try {
-    const txReceipt = await publicClient.getTransactionReceipt({
-      hash: txHash,
-    });
-    console.log('txReceipt :>> ', txReceipt);
-    res.status(200).json({ success: true, status: txReceipt.status });
+    let status;
+    switch (protocol) {
+      case MainProtocolSymbols.ETH:
+        const txReceipt = await publicClient.getTransactionReceipt({
+          hash: txHash,
+        });
+        status = txReceipt.status;
+        break;
+      default:
+        break;
+    }
+    res.status(200).json({ status: txReceipt.status });
   } catch (error) {
     res.status(404).json({ success: false, error });
   }
