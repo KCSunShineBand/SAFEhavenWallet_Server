@@ -1,46 +1,24 @@
 const express = require('express');
-const {
-  createPublicClient,
-  http,
-  parseUnits,
-  parseEther,
-  formatEther,
-  formatUnits,
-} = require('viem');
-const { mainnet, sepolia } = require('viem/chains');
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(
-    'https://eth-sepolia.g.alchemy.com/v2/4skKweefhtqDlhmh1W502pf8b3O9ymuA'
-  ),
-});
-const ethereum = require('@airgap/ethereum/v0');
+const { parseUnits, parseEther, formatEther, formatUnits } = require('viem');
+
 const {
   Domain,
   MainProtocolSymbols,
   SubProtocolSymbols,
 } = require('@airgap/coinlib-core');
-const { NetworkType } = require('@airgap/coinlib-core/utils/ProtocolNetwork');
 const { Serializer, IACMessageType } = require('@airgap/serializer');
+const { ethereum, ethereumProtocol } = require('./ethereum');
+const {
+  bitcoin,
+  bitcoinProtocol,
+  bitcoinSegwitProtocol,
+  bitcoinTestnetProtocol,
+} = require('./bitcoin');
 
 const serializer = Serializer.getInstance();
 
 const app = express();
 const port = 3000;
-const ethereumProtocol = new ethereum.EthereumProtocol(
-  new ethereum.EthereumProtocolOptions(
-    new ethereum.EthereumProtocolNetwork(
-      'Sepolia',
-      NetworkType.TESTNET,
-      'https://eth-sepolia.g.alchemy.com/v2/4skKweefhtqDlhmh1W502pf8b3O9ymuA',
-      'https://sepolia.etherscan.io',
-      {
-        blockExplorerApi: 'https://sepolia.etherscan.io/api',
-        chainID: 11155111,
-      }
-    )
-  )
-);
 
 app.use(express.json());
 
@@ -59,48 +37,110 @@ app.post('/sync', async (req, res, next) => {
     }
   })();
   const output = (await serializer.deserialize(data))[0];
-  console.log('output :>> ', output);
-  const addresses = await ethereumProtocol.getAddressFromExtendedPublicKey(
+  let protocol;
+  switch (output.protocol) {
+    case MainProtocolSymbols.ETH:
+      protocol = ethereumProtocol;
+      break;
+    case MainProtocolSymbols.BTC:
+      protocol = bitcoinProtocol;
+      break;
+    case MainProtocolSymbols.BTC_SEGWIT:
+      protocol = bitcoinSegwitProtocol;
+      break;
+    default:
+      return res.status(500).json({
+        success: false,
+        error: {
+          errorMessage: 'Not supported protocol',
+        },
+      });
+  }
+  const addresses = await protocol.getAddressFromExtendedPublicKey(
     output.payload.publicKey,
     0,
     0,
     0
   );
-  console.log('address :>> ', addresses);
+  const address = addresses.address;
   res.status(200).json({
+    success: true,
     ...output,
-    address: addresses.address,
+    address,
   });
 });
 
 app.post('/transfer/request', async (req, res, next) => {
   try {
-    const { address, protocol, publicKey, recipient, amount } = req.body;
+    const {
+      address,
+      protocol,
+      publicKey,
+      recipient,
+      amount,
+      speed = 'medium',
+    } = req.body;
     let unsignedTx;
     switch (protocol) {
       case MainProtocolSymbols.ETH:
         {
-          console.log('address :>> ', address);
-          const gas = await publicClient.estimateGas({
-            account: address,
-            to: recipient,
-            value: parseEther(amount),
-          });
-          const gasPrice = await publicClient.getGasPrice();
-          console.log('gasPrice :>> ', gasPrice);
+          const fee =
+            await ethereumProtocol.estimateFeeDefaultsFromExtendedPublicKey(
+              publicKey,
+              [recipient],
+              [parseEther(amount).toString()]
+            );
           unsignedTx =
             await ethereumProtocol.prepareTransactionFromExtendedPublicKey(
               publicKey,
               0,
               [recipient],
               [parseEther(amount).toString()],
-              (gas * gasPrice * 5n).toString()
+              parseEther(fee[speed]).toString()
+            );
+        }
+        break;
+      case MainProtocolSymbols.BTC:
+        {
+          const fee =
+            await bitcoinProtocol.estimateFeeDefaultsFromExtendedPublicKey(
+              publicKey,
+              [recipient],
+              [parseUnits(amount, 8).toString()]
+            );
+          unsignedTx =
+            await bitcoinProtocol.prepareTransactionFromExtendedPublicKey(
+              publicKey,
+              0,
+              [recipient],
+              [parseUnits(amount, 8).toString()],
+              parseUnits(fee[speed], 8).toString()
+            );
+        }
+        break;
+      case MainProtocolSymbols.BTC_SEGWIT:
+        {
+          const fee =
+            await bitcoinProtocol.estimateFeeDefaultsFromExtendedPublicKey(
+              publicKey,
+              [recipient],
+              [parseUnits(amount, 8).toString()]
+            );
+          unsignedTx =
+            await bitcoinSegwitProtocol.prepareTransactionFromExtendedPublicKey(
+              publicKey,
+              0,
+              [recipient],
+              [parseUnits(amount, 8).toString()],
+              parseUnits(fee[speed], 8).toString(),
+              { masterFingerprint: '00000000', replaceByFee: false }
             );
         }
         break;
       default:
         break;
     }
+    console.log('unsignedTx :>> ', unsignedTx);
     const data = await serializer.serialize([
       {
         id: (Math.random() * 10000000000).toFixed(0).padStart(10, 0),
@@ -113,11 +153,11 @@ app.post('/transfer/request', async (req, res, next) => {
         },
       },
     ]);
-    console.log('data :>> ', data);
     console.log(await serializer.deserialize(data));
-    res.json({ qrData: data.join(',') });
+    res.json({ success: true, qrData: data.join(',') });
   } catch (error) {
-    console.log(error);
+    console.log('error :>> ', error);
+    console.log(JSON.stringify(error));
     res.status(500).json({ success: false, error: error });
   }
 });
@@ -133,12 +173,10 @@ app.post('/transfer/response', async (req, res, next) => {
     }
   })();
   const output = (await serializer.deserialize(data))[0];
-  const tx = '0x' + output.payload.transaction;
-  console.log('tx :>> ', tx);
-  const txHash = await publicClient.sendRawTransaction({
-    serializedTransaction: tx,
-  });
-  res.status(200).json({ txHash });
+  const txHash = await ethereumProtocol.broadcastTransaction(
+    output.payload.transaction
+  );
+  res.status(200).json({ success: true, txHash });
 });
 
 app.post('/tx/status', async (req, res) => {
@@ -147,15 +185,13 @@ app.post('/tx/status', async (req, res) => {
     let status;
     switch (protocol) {
       case MainProtocolSymbols.ETH:
-        const txReceipt = await publicClient.getTransactionReceipt({
-          hash: txHash,
-        });
-        status = txReceipt.status;
+        status = (await ethereumProtocol.getTransactionStatuses([txHash]))[0];
+        console.log('status :>> ', status);
         break;
       default:
         break;
     }
-    res.status(200).json({ status: txReceipt.status });
+    res.status(200).json({ success: true, status });
   } catch (error) {
     res.status(404).json({ success: false, error });
   }
