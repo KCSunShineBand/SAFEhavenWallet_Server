@@ -1,0 +1,121 @@
+{
+	"info": {
+		"_postman_id": "29c238f6-463f-43ac-a8bd-d73e437022c6",
+		"name": "Airgap Wallet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28144739"
+	},
+	"item": [
+		{
+			"name": "localhost:3000/sync",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"qrData\": \"PVttrMLstECaVRyXomLLSSJX8LxrjeDqn5sdXURLyT8emyGVfFKyCyYAe8w431gq3hhRpdmwP4ZB34e27GJBB5FZdMnNxU5PERdJ52KNrNKdfVfG3noULR83nw7Ca9xJMQunGUca5Q4VEvvT1KWcA3pcbDQz1CbnVzubGPpGwH7pRNsCkzrnXLL1wR54joJWXjpif1YRV8w5Trc2rJnaHP65\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/sync",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"sync"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/transfer/request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"protocol\": \"eth\",\r\n    \"publicKey\": \"xpub6DF5kbC31TTqdiE2SapHccsYdyp3dbwVVWoGx8EGeXeG3QZWvqAYYFVyjS81oPFsxSPosVpRuZ6RLsD8ALL7jm7fjJkbkzLK37j23o31Ji3\",\r\n    \"recipient\": \"0xa99A97B95f7D43aEe1AD0Cbc82f317bFEcBDa043\",\r\n    \"amount\": \"0.1\",\r\n    \"speed\": \"high\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/transfer/request",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transfer",
+						"request"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/transfer/response",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"protocol\": \"eth\",\r\n    \"qrData\": \"MxpGHU2fvFhdMGHZAj7k8GEuVMUQDwG4tLveDrWP5mu4vuQDBGioJNv1wVyyawxmU4ycH7TFXYb8JyPzVKGHDzHsPuKnTySmNDop4HoNCYzAAU7qofMjMMLQAowJu9BSj1hYJgdGNPytFF7pBBPFcJiiYFsPjiZ5vu4528R7QtNR8ywZKPHqcPm8BnA8WVxAJJhFGWBqvkVNuAUcuai4XnMznUeKBn7tHDcfN2oqacYEmDsqUV1RqgWijd5MPEAP8egoGBb8PJNrvP5M53Npcsq6njnimEf2Bo6c6KRo8CYQo22GsV3RATjAPqmb9bcf6tonSzrLukerpyCEb4GzSMpMmNdVgmoNzGsBNeBgT4Lf7B6eZHDQcrcYvmAeRrXqP2ewfpdo5zpifSMGd2SzUgLxiPyVKptn2RZFMHJLC1xuCp195fzzoSA8GmnQueHXpgKWpVpdCDBgJzjyUr5wtWeKdcj8BR1hfp4g3wdVTscZQf4vzsyHgNswhsnkkyG\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/transfer/response",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transfer",
+						"response"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/tx/status",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"protocol\": \"eth\",\r\n    \"txHash\": \"0xbf51991b1a696b0ca1b322a350bf4aa884ec02434afa1c09c9182efbd2d0dcbd\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/tx/status",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"tx",
+						"status"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
