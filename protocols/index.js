@@ -9,6 +9,7 @@ const {
   parseUnits,
   encodeFunctionData,
   parseEther,
+  estimateGas,
 } = require('viem');
 const { mainnet, goerli } = require('viem/chains');
 const {
@@ -141,64 +142,56 @@ const prepareSwap = async (protocolSymbol, txOptions) => {
       slippage: 0.0005,
       deadlineMinutes: 20,
       disableMultihops: false,
-      uniswapVersions: [UniswapVersion.v2],
+      uniswapVersions: [UniswapVersion.v2, UniswapVersion.v3],
     }),
   });
-
   const uniswapPairFactory = await uniswapPair.createFactory();
   const trade = await uniswapPairFactory.trade(amount);
   if (!trade.fromBalance.hasEnough) {
     throw new Error('Not enough balance to swap');
   }
-
-  const calls = [
-    [
-      [
-        trade.transaction.to,
-        false,
-        trade.transaction.value,
-        trade.transaction.data,
-      ],
-    ],
-  ];
-  if (trade.approvalTransaction) {
-    calls[0].unshift([
-      trade.approvalTransaction.to,
-      false,
-      trade.approvalTransaction.value,
-      trade.approvalTransaction.data,
-    ]);
-  }
-  console.log('calls :>> ', calls);
-  const calldata = encodeFunctionData({
-    abi: multicall3ABI,
-    functionName: 'aggregate3Value',
-    args: calls,
-  });
-  const tx = await publicClient.prepareTransactionRequest({
-    account: address,
-    address: '0xcA11bde05977b3631167028862bE2a173976CA11',
-    abi: multicall3ABI,
-    functionName: 'aggregate3Value',
-    args: calls,
-    value: trade.approvalTransaction
-      ? BigInt(trade.approvalTransaction.value) +
-        BigInt(trade.transaction.value)
-      : BigInt(trade.transaction.value),
+  let txCount = await publicClient.getTransactionCount({
+    address,
   });
   const gasPrice = await publicClient.getGasPrice();
   let gasPrices = [];
   gasPrices['low'] = gasPrice / 2n;
   gasPrices['medium'] = gasPrice;
   gasPrices['high'] = gasPrice + gasPrice / 2n;
+  if (trade.approvalTransaction) {
+    const unsignedTx = {
+      nonce: `0x${txCount.toString(16)}`,
+      gasLimit: `0x${(
+        await publicClient.estimateGas({
+          account: address,
+          data: trade.approvalTransaction.data,
+          to: trade.approvalTransaction.to,
+          value: BigInt(trade.approvalTransaction.value),
+        })
+      ).toString(16)}`,
+      gasPrice: `0x${gasPrices[speed].toString(16)}`,
+      to: trade.approvalTransaction.to,
+      value: trade.approvalTransaction.value,
+      chainId: publicClient.chain.id,
+      data: trade.approvalTransaction.data,
+    };
+    return unsignedTx;
+  }
   const unsignedTx = {
-    nonce: `0x${tx.nonce.toString(16)}`,
-    gasLimit: `0x${(tx.gas * 5n).toString(16)}`,
+    nonce: `0x${txCount.toString(16)}`,
+    gasLimit: `0x${(
+      await publicClient.estimateGas({
+        account: address,
+        data: trade.transaction.data,
+        to: trade.transaction.to,
+        value: BigInt(trade.transaction.value),
+      })
+    ).toString(16)}`,
     gasPrice: `0x${gasPrices[speed].toString(16)}`,
-    to: tx.address,
-    value: `0x${tx.value.toString(16)}`,
+    to: trade.transaction.to,
+    value: trade.transaction.value,
     chainId: publicClient.chain.id,
-    data: calldata,
+    data: trade.transaction.data,
   };
   return unsignedTx;
 };
