@@ -34,13 +34,13 @@
 			"response": []
 		},
 		{
-			"name": "localhost:3000/transfer/request",
+			"name": "localhost:3000/swap",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"protocol\": \"eth\",\r\n    \"publicKey\": \"xpub6DF5kbC31TTqdiE2SapHccsYdyp3dbwVVWoGx8EGeXeG3QZWvqAYYFVyjS81oPFsxSPosVpRuZ6RLsD8ALL7jm7fjJkbkzLK37j23o31Ji3\",\r\n    \"recipient\": \"0xa99A97B95f7D43aEe1AD0Cbc82f317bFEcBDa043\",\r\n    \"amount\": \"0.1\",\r\n    \"speed\": \"high\"\r\n}",
+					"raw": "{\r\n    \"protocol\": \"swap\",\r\n    \"publicKey\": \"xpub6DF5kbC31TTqdiE2SapHccsYdyp3dbwVVWoGx8EGeXeG3QZWvqAYYFVyjS81oPFsxSPosVpRuZ6RLsD8ALL7jm7fjJkbkzLK37j23o31Ji3\",\r\n    \"recipient\": \"0xa99A97B95f7D43aEe1AD0Cbc82f317bFEcBDa043\",\r\n    \"amount\": \"0.1\",\r\n    \"speed\": \"high\",\r\n    \"token0Contract\": \"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984\",\r\n    \"token1Contract\": \"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -48,27 +48,26 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:3000/transfer/request",
+					"raw": "localhost:3000/swap",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"transfer",
-						"request"
+						"swap"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "localhost:3000/transfer/response",
+			"name": "localhost:3000/tx/request",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"protocol\": \"eth\",\r\n    \"qrData\": \"MxpGHU2fvFhdMGHZAj7k8GEuVMUQDwG4tLveDrWP5mu4vuQDBGioJNv1wVyyawxmU4ycH7TFXYb8JyPzVKGHDzHsPuKnTySmNDop4HoNCYzAAU7qofMjMMLQAowJu9BSj1hYJgdGNPytFF7pBBPFcJiiYFsPjiZ5vu4528R7QtNR8ywZKPHqcPm8BnA8WVxAJJhFGWBqvkVNuAUcuai4XnMznUeKBn7tHDcfN2oqacYEmDsqUV1RqgWijd5MPEAP8egoGBb8PJNrvP5M53Npcsq6njnimEf2Bo6c6KRo8CYQo22GsV3RATjAPqmb9bcf6tonSzrLukerpyCEb4GzSMpMmNdVgmoNzGsBNeBgT4Lf7B6eZHDQcrcYvmAeRrXqP2ewfpdo5zpifSMGd2SzUgLxiPyVKptn2RZFMHJLC1xuCp195fzzoSA8GmnQueHXpgKWpVpdCDBgJzjyUr5wtWeKdcj8BR1hfp4g3wdVTscZQf4vzsyHgNswhsnkkyG\"\r\n}",
+					"raw": "{\r\n    \"protocol\": \"eth\",\r\n    \"qrData\": \"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\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -76,14 +75,14 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:3000/transfer/response",
+					"raw": "localhost:3000/tx/request",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"transfer",
-						"response"
+						"tx",
+						"request"
 					]
 				}
 			},
@@ -96,7 +95,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"protocol\": \"eth\",\r\n    \"txHash\": \"0xbf51991b1a696b0ca1b322a350bf4aa884ec02434afa1c09c9182efbd2d0dcbd\"\r\n}",
+					"raw": "{\r\n    \"protocol\": \"eth\",\r\n    \"txHash\": \"0x51da6d38b79bd09a5b7e1154bfc9b0457ea732d386072251cda699508d2d94e3\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -112,6 +111,33 @@
 					"path": [
 						"tx",
 						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/transfer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"protocol\": \"eth-erc20\",\r\n    \"publicKey\": \"xpub6DF5kbC31TTqdiE2SapHccsYdyp3dbwVVWoGx8EGeXeG3QZWvqAYYFVyjS81oPFsxSPosVpRuZ6RLsD8ALL7jm7fjJkbkzLK37j23o31Ji3\",\r\n    \"recipient\": \"0xa99A97B95f7D43aEe1AD0Cbc82f317bFEcBDa043\",\r\n    \"amount\": \"0.1\",\r\n    \"speed\": \"medium\",\r\n    \"contract\": \"0x487C738529BCDA310af158264dE0EBdA332e7532\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/transfer",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transfer"
 					]
 				}
 			},
