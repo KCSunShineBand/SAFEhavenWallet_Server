@@ -5,10 +5,12 @@ const {
   deserialize,
   getProtocol,
   getAddressFromPublicKey,
-  prepareTransaction,
+  prepareTransfer,
+  prepareSwap,
   broadcastTransaction,
   getTransactionStatus,
 } = require('./protocols');
+const { MainProtocolSymbols } = require('@airgap/coinlib-core');
 
 const app = express();
 const port = 3000;
@@ -47,12 +49,11 @@ app.post('/sync', async (req, res, next) => {
   }
 });
 
-app.post('/transfer/request', async (req, res, next) => {
+app.post('/transfer', async (req, res, next) => {
   try {
     const { protocol, ...txOptions } = req.body;
     const { publicKey } = txOptions;
-    const unsignedTx = await prepareTransaction(protocol, txOptions);
-    console.log('unsignedTx :>> ', unsignedTx);
+    const unsignedTx = await prepareTransfer(protocol, txOptions);
     const data = await serialize([
       {
         id: (Math.random() * 10000000000).toFixed(0).padStart(10, 0),
@@ -68,12 +69,35 @@ app.post('/transfer/request', async (req, res, next) => {
     res.json({ success: true, qrData: data.join(',') });
   } catch (error) {
     console.log('error :>> ', error);
-    console.log(JSON.stringify(error));
-    res.status(400).json({ success: false, error: error });
+    res.status(400).json({ success: false, error: error.message });
   }
 });
 
-app.post('/transfer/response', async (req, res, next) => {
+app.post('/swap', async (req, res, next) => {
+  try {
+    const { protocol, ...txOptions } = req.body;
+    const { publicKey } = txOptions;
+    const unsignedTx = await prepareSwap(protocol, txOptions);
+    const data = await serialize([
+      {
+        id: (Math.random() * 10000000000).toFixed(0).padStart(10, 0),
+        type: IACMessageType.TransactionSignRequest,
+        protocol: MainProtocolSymbols.ETH,
+        payload: {
+          transaction: unsignedTx,
+          publicKey: publicKey,
+          callbackURL: 'airgap-wallet://?d=',
+        },
+      },
+    ]);
+    res.json({ success: true, qrData: data.join(',') });
+  } catch (error) {
+    console.log('error :>> ', error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/tx/request', async (req, res, next) => {
   const { protocol, qrData } = req.body;
   const output = await deserialize(qrData);
   const txHash = await broadcastTransaction(

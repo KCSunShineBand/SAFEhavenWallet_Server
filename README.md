@@ -1,6 +1,28 @@
 # My SafeHaven Wallet Backend API
 
-## POST /sync
+## Supported Protocols
+
+- Aeternity
+- Astar
+- Bitcoin
+- Bitcoin Segwit
+- Cosmos
+- Ethereum
+- Groestlcoin
+- Moonbeam
+- Polkadot
+- Tezos
+
+## Unsupported Chains (v1)
+
+- Coreum
+- Internet Computer Protocol (ICP)
+- Mina
+- Optimism
+
+## API endpoints
+
+### POST /sync
 
 Read QR code (v2) from Airgap Vault and send the data to this endpoint for retrieving address and publicKey.
 
@@ -28,7 +50,7 @@ Read QR code (v2) from Airgap Vault and send the data to this endpoint for retri
 }
 ```
 
-## POST /transfer/request
+### POST /transfer/request
 
 Send below data to transfer ETH to other address. You can use return data to generate QR code and read it from Airgap Vault.
 
@@ -52,7 +74,7 @@ Send below data to transfer ETH to other address. You can use return data to gen
 }
 ```
 
-## POST /transfer/response
+### POST /transfer/response
 
 Sign the requested transaction, and generate QR code(v2) for syncing. Read it from wallet and send it to this endpoint to broadcast it.
 
@@ -72,7 +94,7 @@ Sign the requested transaction, and generate QR code(v2) for syncing. Read it fr
 }
 ```
 
-## POST /tx/status
+### POST /tx/status
 
 Fetch status with transaction hash
 
